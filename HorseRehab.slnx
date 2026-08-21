@@ -1,9 +1,11 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/HorseRehab.Api/HorseRehab.Api.csproj" />
     <Project Path="src/HorseRehab.Console/HorseRehab.Console.csproj" />
     <Project Path="src/HorseRehab.Core/HorseRehab.Core.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/HorseRehab.Api.Tests/HorseRehab.Api.Tests.csproj" />
     <Project Path="tests/HorseRehab.Core.Tests/HorseRehab.Core.Tests.csproj" />
   </Folder>
 </Solution>

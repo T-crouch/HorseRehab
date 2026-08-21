@@ -8,7 +8,7 @@ The long-term goal is to create a system that helps horse owners, trainers, and 
 
 ## Project Status
 
-**Current stage: Core domain development**
+**Current stage: Web API development**
 
 Currently implemented:
 
@@ -20,6 +20,9 @@ Currently implemented:
 - Equipment-based exercise eligibility evaluation
 - Eligibility results with failure reasons
 - Unit tests using xUnit
+- ASP.NET Core equipment eligibility endpoint
+- HTTP request validation and integration tests
+- Interactive OpenAPI documentation using Scalar
 - Console application for testing domain behavior
 
 Planned:
@@ -27,7 +30,6 @@ Planned:
 - General exercise eligibility rules
 - Rehabilitation plans
 - Workout prescriptions
-- ASP.NET Core API
 - SQL database with Entity Framework Core
 - React/TypeScript frontend
 - Authentication
@@ -117,19 +119,22 @@ HorseRehab/
 ├── .gitignore
 │
 ├── src/
-│   ├── HorseRehab.Core/
-│   │   ├── Eligibility/
-│   │   ├── Exercises/
-│   │   ├── Facilities/
-│   │   └── Horses/
-│   │
-│   └── HorseRehab.Console/
+│   ├── HorseRehab.Api/
+│   │   ├── Contracts/
+│   │   └── Endpoints/
+│   ├── HorseRehab.Console/
+│   └── HorseRehab.Core/
+│       ├── Eligibility/
+│       ├── Exercises/
+│       ├── Facilities/
+│       └── Horses/
 │
 └── tests/
+    ├── HorseRehab.Api.Tests/
     └── HorseRehab.Core.Tests/
 ```
 
-The structure will evolve as additional application layers are added.
+The structure will continue to evolve as additional application layers are added.
 
 ---
 
@@ -150,6 +155,40 @@ The Core project is intended to remain independent from:
 
 This allows the domain logic to be tested independently and reused by future application layers.
 
+### HorseRehab.Api
+
+Provides the HTTP interface for web clients. API contracts and endpoint mapping remain separate from the Core project. The API converts requests into domain models and delegates decisions to injected domain services.
+
+The first endpoint is:
+
+```text
+POST /api/eligibility/equipment
+```
+
+Example request:
+
+```json
+{
+  "requiredEquipment": ["Cavaletti", "GroundPoles"],
+  "availableEquipment": ["Cavaletti"]
+}
+```
+
+Example response:
+
+```json
+{
+  "isEligible": false,
+  "reasons": [
+    "Required equipment not available: GroundPoles."
+  ]
+}
+```
+
+Equipment values use their documented names. Unknown names, numeric enum values, malformed JSON, missing properties, and null collections produce a `400 Bad Request` response.
+
+During development, interactive API documentation is available at `/scalar` and the generated OpenAPI document is available at `/openapi/v1.json`. These routes are intentionally disabled outside the Development environment to avoid exposing API details in production.
+
 ### HorseRehab.Core.Tests
 
 Contains automated unit tests for domain behavior.
@@ -160,6 +199,12 @@ Current tests verify equipment eligibility when:
 - An exercise requires no equipment
 - One required item is unavailable
 - Multiple required items are unavailable
+- Duplicate requirements and facility entries
+- Null evaluator arguments
+
+### HorseRehab.Api.Tests
+
+Contains integration tests that exercise the complete HTTP request pipeline. Tests cover successful evaluations, missing equipment, empty and duplicate collections, missing or null properties, invalid equipment values, malformed JSON, the generated OpenAPI contract, the interactive documentation route, and production-environment restrictions.
 
 ### HorseRehab.Console
 
@@ -308,15 +353,16 @@ Example:
 
 ### Phase 3 — Backend
 
-- [ ] ASP.NET Core Web API
-- [ ] REST endpoints
-- [ ] Dependency injection
-- [ ] Request validation
+- [x] ASP.NET Core Web API foundation
+- [x] Equipment eligibility REST endpoint
+- [x] Dependency injection
+- [x] Request validation
 - [ ] Entity Framework Core
 - [ ] SQL database
 - [ ] Database migrations
-- [ ] Integration tests
-- [ ] Logging and error handling
+- [x] Equipment eligibility integration tests
+- [x] Console and debug logging foundation
+- [ ] Centralized production error handling
 
 ### Phase 4 — Frontend
 
@@ -334,7 +380,7 @@ Example:
 - [ ] Authentication and authorization
 - [ ] CI/CD
 - [ ] Cloud deployment
-- [ ] API documentation
+- [x] Interactive OpenAPI documentation foundation
 - [ ] Architecture diagrams
 - [ ] Application screenshots
 - [ ] Production monitoring and logging
@@ -379,6 +425,14 @@ Run the console application:
 dotnet run --project src/HorseRehab.Console
 ```
 
+Run the web API:
+
+```bash
+dotnet run --project src/HorseRehab.Api
+```
+
+The Development launch profile opens the interactive API documentation automatically. If the browser does not open, navigate to `http://localhost:5000/scalar`. Use the interface to inspect and send requests to `/api/eligibility/equipment`.
+
 ---
 
 ## Design Principles
@@ -415,18 +469,19 @@ Concepts such as equipment, exercise types, and difficulty levels should be mode
 
 - C#
 - .NET
+- ASP.NET Core
+- REST API
+- OpenAPI and Scalar
 - xUnit
 - Git
 - GitHub
 
 ### Planned
 
-- ASP.NET Core
 - Entity Framework Core
 - SQL
 - React
 - TypeScript
-- REST API
 - Cloud deployment
 - CI/CD
 

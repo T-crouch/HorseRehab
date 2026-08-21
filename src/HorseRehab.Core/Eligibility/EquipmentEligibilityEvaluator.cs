@@ -6,7 +6,7 @@ namespace HorseRehab.Core.Eligibility;
 /// <summary>
 /// Evaluates whether a facility has the equipment required for an exercise.
 /// </summary>
-public class EquipmentEligibilityEvaluator
+public sealed class EquipmentEligibilityEvaluator : IEquipmentEligibilityEvaluator
 {
     /// <summary>
     /// Determines whether all equipment required by an exercise is available.
@@ -18,9 +18,12 @@ public class EquipmentEligibilityEvaluator
         Exercise exercise,
         FacilityProfile facility)
     {
+        ArgumentNullException.ThrowIfNull(exercise);
+        ArgumentNullException.ThrowIfNull(facility);
+
         EligibilityResult result = new EligibilityResult();
 
-        foreach (EquipmentType equipment in exercise.RequiredEquipment)
+        foreach (EquipmentType equipment in exercise.RequiredEquipment.Distinct())
         {
             if (!facility.AvailableEquipment.Contains(equipment))
             {

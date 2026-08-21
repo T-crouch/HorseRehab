@@ -74,6 +74,60 @@ public class EquipmentEligibilityEvaluatorTests
             result.Reasons);
     }
 
+    [Fact]
+    public void Evaluate_WhenARequirementIsRepeated_ReturnsOneReason()
+    {
+        Exercise exercise = CreateExercise(
+            EquipmentType.Treadmill,
+            EquipmentType.Treadmill);
+        FacilityProfile facility = CreateFacility();
+        EquipmentEligibilityEvaluator evaluator = new();
+
+        EligibilityResult result = evaluator.Evaluate(exercise, facility);
+
+        Assert.False(result.IsEligible);
+        Assert.Equal(
+            ["Required equipment not available: Treadmill."],
+            result.Reasons);
+    }
+
+    [Fact]
+    public void Evaluate_WhenFacilityContainsDuplicateEquipment_ReturnsEligible()
+    {
+        Exercise exercise = CreateExercise(EquipmentType.Cavaletti);
+        FacilityProfile facility = CreateFacility(
+            EquipmentType.Cavaletti,
+            EquipmentType.Cavaletti);
+        EquipmentEligibilityEvaluator evaluator = new();
+
+        EligibilityResult result = evaluator.Evaluate(exercise, facility);
+
+        Assert.True(result.IsEligible);
+        Assert.Empty(result.Reasons);
+    }
+
+    [Fact]
+    public void Evaluate_WhenExerciseIsNull_ThrowsArgumentNullException()
+    {
+        EquipmentEligibilityEvaluator evaluator = new();
+
+        ArgumentNullException exception = Assert.Throws<ArgumentNullException>(
+            () => evaluator.Evaluate(null!, CreateFacility()));
+
+        Assert.Equal("exercise", exception.ParamName);
+    }
+
+    [Fact]
+    public void Evaluate_WhenFacilityIsNull_ThrowsArgumentNullException()
+    {
+        EquipmentEligibilityEvaluator evaluator = new();
+
+        ArgumentNullException exception = Assert.Throws<ArgumentNullException>(
+            () => evaluator.Evaluate(CreateExercise(), null!));
+
+        Assert.Equal("facility", exception.ParamName);
+    }
+
     private static Exercise CreateExercise(
         params EquipmentType[] requiredEquipment)
     {
