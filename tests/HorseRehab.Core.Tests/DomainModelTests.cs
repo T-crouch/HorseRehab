@@ -16,7 +16,9 @@ public sealed class DomainModelTests
         HorseProfile horse = new();
 
         Assert.Equal(string.Empty, horse.Name);
-        Assert.False(horse.IsEurociserTrained);
+        Assert.Equal(HorseTrainingLevel.Untrained, horse.TrainingLevel);
+        Assert.Empty(horse.Conditions);
+        Assert.Empty(horse.RehabilitationRestrictions);
     }
 
     [Fact]
@@ -25,11 +27,26 @@ public sealed class DomainModelTests
         HorseProfile horse = new()
         {
             Name = "Piper",
-            IsEurociserTrained = true
+            TrainingLevel = HorseTrainingLevel.Advanced,
+            Conditions =
+            [
+                new HorseCondition(
+                    Guid.NewGuid(),
+                    "Tendon injury",
+                    ConditionCategory.Injury)
+            ],
+            RehabilitationRestrictions =
+            [
+                new RehabilitationRestriction(
+                    "No ridden work.",
+                    prohibitsRiddenExercise: true)
+            ]
         };
 
         Assert.Equal("Piper", horse.Name);
-        Assert.True(horse.IsEurociserTrained);
+        Assert.Equal(HorseTrainingLevel.Advanced, horse.TrainingLevel);
+        Assert.Single(horse.Conditions);
+        Assert.Single(horse.RehabilitationRestrictions);
     }
 
     [Fact]
@@ -41,6 +58,9 @@ public sealed class DomainModelTests
         Assert.Equal(ExerciseType.HandWalking, exercise.Type);
         Assert.Equal(string.Empty, exercise.Description);
         Assert.Equal(ExerciseDifficulty.Beginner, exercise.Difficulty);
+        Assert.Equal(
+            HorseTrainingLevel.Untrained,
+            exercise.MinimumTrainingLevel);
         Assert.False(exercise.IsRidden);
         Assert.Empty(exercise.RequiredEquipment);
     }
@@ -54,6 +74,7 @@ public sealed class DomainModelTests
             Type = ExerciseType.Cavaletti,
             Description = "Ride over raised poles.",
             Difficulty = ExerciseDifficulty.Advanced,
+            MinimumTrainingLevel = HorseTrainingLevel.Advanced,
             IsRidden = true,
             RequiredEquipment = [EquipmentType.Cavaletti]
         };
@@ -62,6 +83,9 @@ public sealed class DomainModelTests
         Assert.Equal(ExerciseType.Cavaletti, exercise.Type);
         Assert.Equal("Ride over raised poles.", exercise.Description);
         Assert.Equal(ExerciseDifficulty.Advanced, exercise.Difficulty);
+        Assert.Equal(
+            HorseTrainingLevel.Advanced,
+            exercise.MinimumTrainingLevel);
         Assert.True(exercise.IsRidden);
         Assert.Equal([EquipmentType.Cavaletti], exercise.RequiredEquipment);
     }

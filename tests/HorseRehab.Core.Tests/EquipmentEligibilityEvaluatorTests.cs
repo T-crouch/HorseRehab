@@ -1,6 +1,7 @@
 using HorseRehab.Core.Eligibility;
 using HorseRehab.Core.Exercises;
 using HorseRehab.Core.Facilities;
+using HorseRehab.Core.Horses;
 
 namespace HorseRehab.Core.Tests.Eligibility;
 
@@ -126,6 +127,34 @@ public class EquipmentEligibilityEvaluatorTests
             () => evaluator.Evaluate(CreateExercise(), null!));
 
         Assert.Equal("facility", exception.ParamName);
+    }
+
+    [Fact]
+    public void ExerciseRuleEvaluate_WhenInputsAreValid_UsesEquipmentRule()
+    {
+        IExerciseEligibilityRule rule = new EquipmentEligibilityEvaluator();
+
+        EligibilityResult result = rule.Evaluate(
+            new HorseProfile(),
+            CreateExercise(EquipmentType.Cavaletti),
+            CreateFacility(EquipmentType.Cavaletti));
+
+        Assert.True(result.IsEligible);
+        Assert.Empty(result.Reasons);
+    }
+
+    [Fact]
+    public void ExerciseRuleEvaluate_WhenHorseIsNull_ThrowsArgumentNullException()
+    {
+        IExerciseEligibilityRule rule = new EquipmentEligibilityEvaluator();
+
+        ArgumentNullException exception = Assert.Throws<ArgumentNullException>(
+            () => rule.Evaluate(
+                null!,
+                CreateExercise(),
+                CreateFacility()));
+
+        Assert.Equal("horse", exception.ParamName);
     }
 
     private static Exercise CreateExercise(

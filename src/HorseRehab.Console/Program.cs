@@ -7,7 +7,13 @@ using HorseRehab.Core.Exercises;
 HorseProfile horse = new HorseProfile
 {
     Name = "Piper",
-    IsEurociserTrained = false
+    TrainingLevel = HorseTrainingLevel.Beginner,
+    RehabilitationRestrictions =
+    [
+        new RehabilitationRestriction(
+            "Cavaletti work requires veterinary clearance.",
+            prohibitedExerciseTypes: [ExerciseType.Cavaletti])
+    ]
 };
 
 Exercise exercise = new Exercise
@@ -16,6 +22,7 @@ Exercise exercise = new Exercise
     Type = ExerciseType.Cavaletti,
     Description = "Walk over raised poles to develop coordination and strength.",
     Difficulty = ExerciseDifficulty.Intermediate,
+    MinimumTrainingLevel = HorseTrainingLevel.Intermediate,
     IsRidden = false,
     RequiredEquipment =
     [
@@ -34,11 +41,16 @@ FacilityProfile facility = new FacilityProfile
 };
 
 // Evaluate eligibility.
-EquipmentEligibilityEvaluator evaluator =
-        new EquipmentEligibilityEvaluator();
+IExerciseEligibilityEvaluator evaluator =
+    new CompositeExerciseEligibilityEvaluator(
+    [
+        new EquipmentEligibilityEvaluator(),
+        new TrainingEligibilityEvaluator(),
+        new RehabilitationRestrictionEligibilityEvaluator()
+    ]);
 
 EligibilityResult result =
-    evaluator.Evaluate(exercise, facility);
+    evaluator.Evaluate(horse, exercise, facility);
 
 // Display result.
 Console.WriteLine($"Horse: {horse.Name}");

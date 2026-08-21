@@ -6,7 +6,9 @@ namespace HorseRehab.Core.Eligibility;
 /// <summary>
 /// Evaluates whether a facility has the equipment required for an exercise.
 /// </summary>
-public sealed class EquipmentEligibilityEvaluator : IEquipmentEligibilityEvaluator
+public sealed class EquipmentEligibilityEvaluator :
+    IEquipmentEligibilityEvaluator,
+    IExerciseEligibilityRule
 {
     /// <summary>
     /// Determines whether all equipment required by an exercise is available.
@@ -34,5 +36,15 @@ public sealed class EquipmentEligibilityEvaluator : IEquipmentEligibilityEvaluat
 
         result.IsEligible = result.Reasons.Count == 0;
         return result;
+    }
+
+    /// <inheritdoc />
+    public EligibilityResult Evaluate(
+        Horses.HorseProfile horse,
+        Exercise exercise,
+        FacilityProfile facility)
+    {
+        ArgumentNullException.ThrowIfNull(horse);
+        return Evaluate(exercise, facility);
     }
 }

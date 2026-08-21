@@ -18,6 +18,10 @@ Currently implemented:
 - Exercise difficulty levels
 - Equipment types
 - Equipment-based exercise eligibility evaluation
+- Horse training levels and minimum exercise training requirements
+- Structured injuries and medical conditions
+- Explicit rehabilitation restrictions
+- Composed equipment, training, and restriction eligibility rules
 - Eligibility results with failure reasons
 - Unit tests using xUnit
 - ASP.NET Core equipment eligibility endpoint
@@ -27,7 +31,6 @@ Currently implemented:
 
 Planned:
 
-- General exercise eligibility rules
 - Rehabilitation plans
 - Workout prescriptions
 - SQL database with Entity Framework Core
@@ -193,14 +196,19 @@ During development, interactive API documentation is available at `/scalar` and 
 
 Contains automated unit tests for domain behavior.
 
-Current tests verify equipment eligibility when:
+Current tests verify:
 
+- Domain model defaults and validation
 - All required equipment is available
 - An exercise requires no equipment
 - One required item is unavailable
 - Multiple required items are unavailable
 - Duplicate requirements and facility entries
-- Null evaluator arguments
+- Training-level boundaries
+- Global, ridden, and exercise-type restrictions
+- Active and inactive restrictions
+- Combination and de-duplication of results from multiple rules
+- Null arguments and invalid rule results
 
 ### HorseRehab.Api.Tests
 
@@ -223,15 +231,21 @@ Represents an individual horse and the information needed to evaluate appropriat
 Current properties include:
 
 - Name
-- Eurociser training status
+- General training level
+- Injuries and medical conditions
+- Rehabilitation restrictions
 
 Future versions may include:
 
-- Conditions and injuries
-- Exercise restrictions
 - Rehabilitation status
-- Training level
-- Veterinary restrictions
+- Veterinary clearances
+- Condition history and clinical observations
+
+Conditions and injuries are recorded independently from restrictions. A diagnosis by itself does not automatically prohibit an exercise; restrictions must be explicitly provided by an authorized professional or a reviewed expert rule.
+
+Training levels progress from `Untrained` through `Beginner`, `Intermediate`, and `Advanced`. Exercises declare their minimum required level, and horses at or above that level satisfy the training rule.
+
+Rehabilitation restrictions include a professional reason and can apply to all exercise, ridden exercise, or selected exercise types. Restrictions can optionally reference the condition that prompted them and can be made inactive when lifted.
 
 ### Exercise
 
@@ -243,6 +257,7 @@ The exercise model includes or is planned to include:
 - Type
 - Description
 - Difficulty
+- Minimum horse training level
 - Whether the exercise is ridden
 - Required equipment
 
@@ -271,6 +286,16 @@ Equipment may include:
 - Treadmill
 
 The facility stores its available equipment as a collection rather than requiring a separate Boolean property for every possible resource.
+
+### Eligibility Rules
+
+Eligibility concerns are implemented as small, independently testable rules:
+
+- Equipment eligibility verifies facility resources.
+- Training eligibility compares the horse's level with the exercise requirement.
+- Rehabilitation restriction eligibility applies explicit active restrictions.
+
+The composite evaluator runs every registered rule and returns one decision with all unique failure reasons in deterministic rule order. This allows future expert-authored rules to be added without changing existing evaluators.
 
 ---
 
@@ -336,10 +361,10 @@ Example:
 - [x] Complete exercise model
 - [x] Generalize facility equipment
 - [x] Add equipment eligibility evaluation
-- [ ] Combine multiple exercise eligibility rules
-- [ ] Add horse training levels
-- [ ] Add conditions and injuries
-- [ ] Add rehabilitation restrictions
+- [x] Combine multiple exercise eligibility rules
+- [x] Add horse training levels
+- [x] Add conditions and injuries
+- [x] Add rehabilitation restrictions
 
 ### Phase 2 — Rehabilitation Planning
 

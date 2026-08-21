@@ -15,8 +15,17 @@ builder.Services.ConfigureHttpJsonOptions(options =>
         new JsonStringEnumConverter(allowIntegerValues: false));
 });
 builder.Services.AddOpenApi();
-builder.Services.AddSingleton<IEquipmentEligibilityEvaluator,
-    EquipmentEligibilityEvaluator>();
+builder.Services.AddSingleton<EquipmentEligibilityEvaluator>();
+builder.Services.AddSingleton<IEquipmentEligibilityEvaluator>(services =>
+    services.GetRequiredService<EquipmentEligibilityEvaluator>());
+builder.Services.AddSingleton<IExerciseEligibilityRule>(services =>
+    services.GetRequiredService<EquipmentEligibilityEvaluator>());
+builder.Services.AddSingleton<IExerciseEligibilityRule,
+    TrainingEligibilityEvaluator>();
+builder.Services.AddSingleton<IExerciseEligibilityRule,
+    RehabilitationRestrictionEligibilityEvaluator>();
+builder.Services.AddSingleton<IExerciseEligibilityEvaluator,
+    CompositeExerciseEligibilityEvaluator>();
 
 WebApplication app = builder.Build();
 
