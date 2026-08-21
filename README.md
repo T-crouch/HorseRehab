@@ -17,7 +17,7 @@ Currently implemented:
 - Exercise types
 - Exercise difficulty levels
 - Equipment types
-- Eurociser eligibility evaluation
+- Equipment-based exercise eligibility evaluation
 - Eligibility results with failure reasons
 - Unit tests using xUnit
 - Console application for testing domain behavior
@@ -57,32 +57,39 @@ HorseRehab is intended to provide a centralized system for planning, evaluating,
 
 ## Current Example
 
-One of the first implemented business rules determines whether a horse is eligible to use a Eurociser.
+One of the first implemented business rules determines whether a facility has the equipment required for an exercise.
 
-A horse is currently eligible when:
+An exercise is eligible under this rule when every item in its required equipment list is available at the facility. Exercises with no equipment requirements are also eligible.
 
-1. The horse is trained to use a Eurociser.
-2. The facility has a Eurociser available.
+This evaluator covers equipment only. Horse training, veterinary restrictions, and rehabilitation-stage rules will be implemented separately and combined in a later eligibility workflow.
 
 Example:
 
 ```csharp
-HorseProfile horse = new HorseProfile
+Exercise exercise = new Exercise
 {
-    Name = "Piper",
-    IsEurociserTrained = true
+    Name = "Cavaletti walking",
+    Type = ExerciseType.Cavaletti,
+    RequiredEquipment =
+    [
+        EquipmentType.Cavaletti,
+        EquipmentType.GroundPoles
+    ]
 };
 
 FacilityProfile facility = new FacilityProfile
 {
-    HasEurociser = true
+    AvailableEquipment =
+    [
+        EquipmentType.Cavaletti
+    ]
 };
 
-EurociserEligibilityEvaluator evaluator =
-    new EurociserEligibilityEvaluator();
+EquipmentEligibilityEvaluator evaluator =
+    new EquipmentEligibilityEvaluator();
 
 EligibilityResult result =
-    evaluator.Evaluate(horse, facility);
+    evaluator.Evaluate(exercise, facility);
 ```
 
 The evaluator returns both the eligibility decision and any reasons the exercise cannot be performed.
@@ -147,12 +154,12 @@ This allows the domain logic to be tested independently and reused by future app
 
 Contains automated unit tests for domain behavior.
 
-Current tests verify Eurociser eligibility when:
+Current tests verify equipment eligibility when:
 
-- All requirements are satisfied
-- The horse is not Eurociser trained
-- The facility does not have a Eurociser
-- Multiple eligibility requirements fail
+- All required equipment is available
+- An exercise requires no equipment
+- One required item is unavailable
+- Multiple required items are unavailable
 
 ### HorseRehab.Console
 
@@ -218,7 +225,7 @@ Equipment may include:
 - Balance pads
 - Treadmill
 
-The facility model will evolve toward a collection of available equipment rather than requiring a separate Boolean property for every possible resource.
+The facility stores its available equipment as a collection rather than requiring a separate Boolean property for every possible resource.
 
 ---
 
@@ -236,30 +243,34 @@ Example:
 
 ```csharp
 [Fact]
-public void Evaluate_WhenHorseIsTrainedAndFacilityHasEurociser_ReturnsEligible()
-{
-    // Arrange
-    HorseProfile horse = new HorseProfile
+    public void Evaluate_WhenAllRequiredEquipmentIsAvailable_ReturnsEligible()
     {
-        Name = "Piper",
-        IsEurociserTrained = true
-    };
+        Exercise exercise = new Exercise
+        {
+            Name = "Cavaletti walking",
+            RequiredEquipment =
+            [
+                EquipmentType.Cavaletti,
+                EquipmentType.GroundPoles
+            ]
+        };
 
-    FacilityProfile facility = new FacilityProfile
-    {
-        HasEurociser = true
-    };
+        FacilityProfile facility = new FacilityProfile
+        {
+            AvailableEquipment =
+            [
+                EquipmentType.Cavaletti,
+                EquipmentType.GroundPoles
+            ]
+        };
 
-    EurociserEligibilityEvaluator evaluator =
-        new EurociserEligibilityEvaluator();
+        EquipmentEligibilityEvaluator evaluator = new();
 
-    // Act
-    EligibilityResult result =
-        evaluator.Evaluate(horse, facility);
+        EligibilityResult result =
+            evaluator.Evaluate(exercise, facility);
 
-    // Assert
-    Assert.True(result.IsEligible);
-    Assert.Empty(result.Reasons);
+        Assert.True(result.IsEligible);
+        Assert.Empty(result.Reasons);
 }
 ```
 
@@ -272,14 +283,15 @@ public void Evaluate_WhenHorseIsTrainedAndFacilityHasEurociser_ReturnsEligible()
 - [x] Create solution structure
 - [x] Create horse profile
 - [x] Create facility profile
-- [x] Implement Eurociser eligibility
+- [x] Prototype Eurociser eligibility
 - [x] Add unit tests
 - [x] Add exercise type enum
 - [x] Add exercise difficulty enum
 - [x] Add equipment type enum
-- [ ] Complete exercise model
-- [ ] Generalize facility equipment
-- [ ] Generalize exercise eligibility
+- [x] Complete exercise model
+- [x] Generalize facility equipment
+- [x] Add equipment eligibility evaluation
+- [ ] Combine multiple exercise eligibility rules
 - [ ] Add horse training levels
 - [ ] Add conditions and injuries
 - [ ] Add rehabilitation restrictions

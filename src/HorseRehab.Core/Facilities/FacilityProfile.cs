@@ -6,7 +6,7 @@ namespace HorseRehab.Core.Facilities;
 public class FacilityProfile
 {
     /// <summary>
-    /// Gets or sets whether the facility has a Eurociser available.
+    /// Gets or sets the equipment available at the facility.
     /// </summary>
-    public bool HasEurociser { get; set; }
+    public List<EquipmentType> AvailableEquipment { get; set; } = [];
 }

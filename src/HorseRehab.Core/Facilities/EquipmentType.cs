@@ -3,7 +3,7 @@ namespace HorseRehab.Core.Facilities;
 /// <summary>
 /// Defines equipment that may be required for rehabilitation exercises.
 /// </summary>
-public enum EquiptmentType
+public enum EquipmentType
 {
     /// <summary>
     /// An automated horse walker used for controlled exercise.

@@ -9,5 +9,5 @@ public class Exercise
     public string Description { get; set; } = string.Empty;
     public ExerciseDifficulty Difficulty { get; set; }
     public bool IsRidden { get; set; }
-    public List<EquiptmentType> RequiredEquiptment { get; set; } = [];
+    public List<EquipmentType> RequiredEquipment { get; set; } = [];
 }

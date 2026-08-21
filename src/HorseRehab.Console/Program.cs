@@ -1,6 +1,7 @@
 ﻿using HorseRehab.Core.Eligibility;
 using HorseRehab.Core.Facilities;
 using HorseRehab.Core.Horses;
+using HorseRehab.Core.Exercises;
 
 // Configure sample data.
 HorseProfile horse = new HorseProfile
@@ -9,18 +10,39 @@ HorseProfile horse = new HorseProfile
     IsEurociserTrained = false
 };
 
+Exercise exercise = new Exercise
+{
+    Name = "Cavaletti walking",
+    Type = ExerciseType.Cavaletti,
+    Description = "Walk over raised poles to develop coordination and strength.",
+    Difficulty = ExerciseDifficulty.Intermediate,
+    IsRidden = false,
+    RequiredEquipment =
+    [
+        EquipmentType.Cavaletti,
+        EquipmentType.GroundPoles
+    ]
+};
+
 FacilityProfile facility = new FacilityProfile
 {
-    HasEurociser = true
+    AvailableEquipment =
+    [
+        EquipmentType.Eurociser,
+        EquipmentType.Cavaletti
+    ]
 };
 
 // Evaluate eligibility.
-EurociserEligibilityEvaluator evaluator = new EurociserEligibilityEvaluator();
+EquipmentEligibilityEvaluator evaluator =
+        new EquipmentEligibilityEvaluator();
 
-EligibilityResult result = evaluator.Evaluate(horse, facility);
+EligibilityResult result =
+    evaluator.Evaluate(exercise, facility);
 
 // Display result.
 Console.WriteLine($"Horse: {horse.Name}");
+Console.WriteLine($"Exercise: {exercise.Name}");
 Console.WriteLine($"Eligible: {result.IsEligible}");
 foreach (string reason in result.Reasons)
 {
